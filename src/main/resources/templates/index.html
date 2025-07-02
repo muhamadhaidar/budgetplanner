@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Budget Planner</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<div class="container py-4">
+    <h1 class="text-center mb-4">Budget Planner</h1>
+
+    <!-- Form untuk mengatur anggaran -->
+    <form th:action="@{/atur-anggaran}" method="post" class="mb-3">
+        <div class="input-group">
+            <input type="number" class="form-control" name="jumlah" placeholder="Atur total anggaran (Rp)" required>
+            <button class="btn btn-primary" type="submit">Atur</button>
+        </div>
+    </form>
+
+    <!-- Info anggaran -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5>Total Anggaran: Rp <span th:text="${budget.totalAnggaran}">0</span></h5>
+            <h5>Sisa Anggaran: Rp <span th:text="${budget.sisaAnggaran}">0</span></h5>
+        </div>
+    </div>
+
+    <!-- Tombol tambah pengeluaran -->
+    <a href="/pengeluaran" class="btn btn-success mb-3">+ Tambah Pengeluaran</a>
+
+    <!-- Tabel daftar pengeluaran -->
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Kategori</th>
+            <th>Jumlah</th>
+            <th>Keterangan</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="item : ${items}">
+            <td th:text="${item.kategori}"></td>
+            <td th:text="${item.jumlah}"></td>
+            <td th:text="${item.keterangan}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
