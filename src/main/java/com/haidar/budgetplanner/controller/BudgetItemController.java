@@ -17,7 +17,7 @@ public class BudgetItemController {
     @Autowired
     private BudgetItemRepository budgetItemRepository;
 
-    private double totalAnggaran = 1000000; // default anggaran awal
+    private double totalAnggaran = 0; // default anggaran awal
 
     @GetMapping("/pengeluaran")
     public String formPengeluaran(Model model) {
@@ -27,6 +27,7 @@ public class BudgetItemController {
 
     @PostMapping("/pengeluaran")
     public String submitPengeluaran(@ModelAttribute BudgetItem budgetItem) {
+        budgetItem.setJenis("pengeluaran");
         budgetItemRepository.save(budgetItem);
         return "redirect:/";
     }
@@ -34,7 +35,7 @@ public class BudgetItemController {
     @GetMapping("/list")
     public String tampilkanList(Model model) {
         List<BudgetItem> items = budgetItemRepository.findAll();
-        double totalPengeluaran = items.stream().mapToDouble(BudgetItem::getJumlah).sum();
+        double totalPengeluaran = items.stream().filter(i -> "pengeluaran".equals(i.getJenis())).mapToDouble(BudgetItem::getJumlah).sum();
         double sisaAnggaran = totalAnggaran - totalPengeluaran;
 
         model.addAttribute("items", items);
@@ -44,9 +45,10 @@ public class BudgetItemController {
     }
 
     @GetMapping("/")
-    public String index(Model model) {
+    public String index(Model model, @RequestParam(required = false) Boolean tambahAnggaran,
+                        @RequestParam(required = false) Double jumlah) {
         List<BudgetItem> items = budgetItemRepository.findAll();
-        double totalPengeluaran = items.stream().mapToDouble(BudgetItem::getJumlah).sum();
+        double totalPengeluaran = items.stream().filter(i -> "pengeluaran".equals(i.getJenis())).mapToDouble(BudgetItem::getJumlah).sum();
         double sisaAnggaran = totalAnggaran - totalPengeluaran;
 
         Map<String, Double> budget = new HashMap<>();
@@ -55,17 +57,49 @@ public class BudgetItemController {
 
         model.addAttribute("items", items);
         model.addAttribute("budget", budget);
+
+        if (tambahAnggaran != null && tambahAnggaran && jumlah != null) {
+            model.addAttribute("tambahAnggaran", true);
+            model.addAttribute("jumlah", jumlah);
+        }
+
         return "index";
     }
 
     @GetMapping("/atur-anggaran")
     public String formAturAnggaran() {
-    return "atur-anggaran";
+        return "atur-anggaran";
     }
 
     @PostMapping("/atur-anggaran")
-    public String simpanAnggaran(@RequestParam("nominal") double nominal) {
-    this.totalAnggaran = nominal;
-    return "redirect:/";
+    public String tambahAnggaran(@RequestParam("nominal") double nominal) {
+        this.totalAnggaran += nominal;
+
+        BudgetItem tambahan = new BudgetItem();
+        tambahan.setKategori("TAMBAH ANGGARAN");
+        tambahan.setJumlah(nominal);
+        tambahan.setKeterangan("Penambahan anggaran");
+        tambahan.setJenis("tambah-anggaran");
+        budgetItemRepository.save(tambahan);
+
+        return "redirect:/?tambahAnggaran=true&jumlah=" + nominal;
+    }
+
+    @PostMapping("/hapus-anggaran")
+    public String hapusTotalAnggaran() {
+        this.totalAnggaran = 0;
+        return "redirect:/";
+    }
+
+    @PostMapping("/pengeluaran/{id}/hapus")
+    public String hapusPengeluaran(@PathVariable Long id) {
+        budgetItemRepository.deleteById(id);
+        return "redirect:/";
+    }
+
+    @PostMapping("/pengeluaran/hapus-semua")
+    public String hapusSemuaPengeluaran() {
+        budgetItemRepository.deleteAll();
+        return "redirect:/";
     }
 }

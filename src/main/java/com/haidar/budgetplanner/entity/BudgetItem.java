@@ -19,6 +19,8 @@ public class BudgetItem {
 
     private String keterangan;
 
+    private String jenis; // "pengeluaran" atau "tambah-anggaran"
+
     public BudgetItem() {}
 
     public BudgetItem(String kategori, double jumlah, String keterangan) {
@@ -27,7 +29,7 @@ public class BudgetItem {
         this.keterangan = keterangan;
     }
 
-    // Getter & Setter
+    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -39,4 +41,7 @@ public class BudgetItem {
 
     public String getKeterangan() { return keterangan; }
     public void setKeterangan(String keterangan) { this.keterangan = keterangan; }
+
+    public String getJenis() { return jenis; }
+    public void setJenis(String jenis) { this.jenis = jenis; }
 }
